@@ -22,9 +22,7 @@ install: all
 	install -m644 m4.1 $(DESTDIR)/usr/share/man/man1
 
 clean:
-	$(RM) parser.c
-	$(RM) parser.h
-	$(RM) tokenizer.c
+	$(RM) m4 parser.c parser.h tokenizer.c
 	$(RM) $(SRCS:%.c=%.o)
 
 parser.c: parser.y
