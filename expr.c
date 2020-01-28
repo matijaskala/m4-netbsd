@@ -36,7 +36,7 @@ extern int yyerror(const char *);
 int
 yyerror(const char *msg)
 {
-	fprintf(stderr, "m4:%s:%lu: %s in expr %s\n", infile[ilevel].name,
+	fprintf(mystderr, "m4:%s:%lu: %s in expr %s\n", infile[ilevel].name,
 	    infile[ilevel].lineno, msg, copy_toeval);
 	return(0);
 }

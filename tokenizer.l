@@ -34,6 +34,8 @@ extern int yywrap(void);
 int32_t number(void);
 int32_t parse_radix(void);
 
+extern FILE *mystderr;
+
 %}
 
 %option nounput
@@ -75,7 +77,7 @@ number(void)
 	l = strtol(yytext, NULL, 0);
 	if (((l == LONG_MAX || l == LONG_MIN) && errno == ERANGE) ||
 	    l > INT32_MAX || l < INT32_MIN) {
-		fprintf(stderr, "m4: numeric overflow in expr: %s\n", yytext);
+		fprintf(mystderr, "m4: numeric overflow in expr: %s\n", yytext);
 	}
 	return l;
 }
@@ -90,7 +92,7 @@ parse_radix(void)
 	l = 0;
 	base = strtol(yytext+2, &next, 0);
 	if (base > 36 || next == NULL) {
-		fprintf(stderr, "m4: error in number %s\n", yytext);
+		fprintf(mystderr, "m4: error in number %s\n", yytext);
 	} else {
 		next++;
 		while (*next != 0) {

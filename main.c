@@ -93,6 +93,8 @@ FILE *freezef = NULL;
 int thawing = 0;
 #endif
 
+FILE *mystderr;
+
 struct keyblk {
         const char *knam;	/* keyword name */
         int	ktyp;           /* keyword type */
@@ -246,6 +248,8 @@ main(int argc, char *argv[])
 	outfile = NULL;
 	resizedivs(MAXOUT);
 
+	mystderr = stderr;
+
 	while ((c = getopt_long(argc, argv, "D:d:e:EF:GgI:iL:o:PR:Qst:U:v",
 	    longopts, NULL)) != -1)
 		switch(c) {
@@ -264,16 +268,11 @@ main(int argc, char *argv[])
 			fatal_warnings++;
 			break;
 		case 'e':
-			/*
-			 * Don't use freopen here because if it fails
-			 * we lose stderr, instead trash it.
-			 */
 			if ((sfp = fopen(optarg, "w+")) == NULL) {
 				warn("Can't redirect errors to `%s'", optarg);
 				break;
 			}
-			fclose(stderr);
-			memcpy(stderr, sfp, sizeof(*sfp));
+			mystderr = sfp;
 			break;
 		case 'F':
 			freeze = optarg;
@@ -320,7 +319,7 @@ main(int argc, char *argv[])
 			macro_popdef(optarg);
 			break;
 		case 'v':
-			fprintf(stderr, "%s version %d\n", getprogname(),
+			fprintf(mystderr, "%s version %d\n", getprogname(),
 			    VERSION);
 			return EXIT_SUCCESS;
 		case OPT_HELP:
@@ -328,7 +327,7 @@ main(int argc, char *argv[])
 			return EXIT_SUCCESS;
 		case '?':
 		default:
-			usage(stderr);
+			usage(mystderr);
 			return EXIT_FAILURE;
 		}
 
@@ -338,7 +337,7 @@ main(int argc, char *argv[])
 	 * go to a known file, even if the command line options
 	 * send it elsewhere. It should not be turned of in production code.
 	 */
-	if (freopen("/tmp/m4", "w+", stderr) == NULL)
+	if (freopen("/tmp/m4", "w+", mystderr) == NULL)
 		err(EXIT_FAILURE, "Can't redirect errors to `%s'",
 		    "/tmp/m4");
 #endif
@@ -766,10 +765,10 @@ dump_stack(struct position *t, int lev)
 
 	for (i = 0; i < lev; i++) {
 		if (i == MAXRECORD) {
-			fprintf(stderr, "   ...\n");
+			fprintf(mystderr, "   ...\n");
 			break;
 		}
-		fprintf(stderr, "   %s at line %lu\n", 
+		fprintf(mystderr, "   %s at line %lu\n", 
 			t[i].name, t[i].line);
 	}
 }

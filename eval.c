@@ -432,11 +432,11 @@ expand_builtin(const char *argv[], int argc, int td)
 	 */
 		if (argc > 2) {
 			for (n = 2; n < argc; n++)
-				fprintf(stderr, "%s%s",
+				fprintf(mystderr, "%s%s",
 				    mimic_gnu && n == 2 ? "" : " ",
 				    argv[n]);
 			if (!mimic_gnu)
-				fprintf(stderr, "\n");
+				fprintf(mystderr, "\n");
 		}
 		break;
 
@@ -646,7 +646,7 @@ static void
 dump_one_def(const char *name, struct macro_definition *p)
 {
 	if (!traceout)
-		traceout = stderr;
+		traceout = mystderr;
 	if (mimic_gnu) {
 		if ((p->type & TYPEMASK) == MACRTYPE)
 			fprintf(traceout, "%s:\t%s\n", name, p->defn);

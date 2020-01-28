@@ -188,3 +188,5 @@ extern int  synch_lines;	/* line synchronisation directives */
 
 extern int mimic_gnu;		/* behaves like gnu-m4 */
 extern int prefix_builtins;	/* prefix builtin macros with m4_ */
+
+extern FILE *mystderr;

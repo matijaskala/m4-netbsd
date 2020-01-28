@@ -63,7 +63,7 @@ void
 trace_file(const char *name)
 {
 
-	if (traceout && traceout != stderr)
+	if (traceout && traceout != mystderr)
 		fclose(traceout);
 	traceout = fopen(name, "w");
 	if (!traceout)
@@ -153,7 +153,7 @@ size_t
 trace(const char *argv[], int argc, struct input_file *inp)
 {
 	if (!traceout)
-		traceout = stderr;
+		traceout = mystderr;
 	print_header(inp);
 	if (trace_flags & TRACE_CONT) {
 		fprintf(traceout, "%s ...\n", argv[1]);
