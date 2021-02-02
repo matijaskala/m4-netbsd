@@ -649,7 +649,7 @@ doesyscmd(const char *cmd)
 {
 	int p[2];
 	pid_t pid, cpid;
-	char *argv[4];
+	const char *argv[4];
 	int cc;
 	int status;
 
@@ -658,7 +658,7 @@ doesyscmd(const char *cmd)
 
 	argv[0] = "sh";
 	argv[1] = "-c";
-	argv[2] = (char*)cmd;
+	argv[2] = cmd;
 	argv[3] = NULL;
 
 	/* Just set up standard output, share stderr and stdin with m4 */
@@ -672,7 +672,7 @@ doesyscmd(const char *cmd)
 		(void) close(p[0]);
 		(void) dup2(p[1], 1);
 		(void) close(p[1]);
-		execv(_PATH_BSHELL, argv);
+		execv(_PATH_BSHELL, (void*)argv);
 		exit(1);
 	default:
 		/* Read result in two stages, since m4's buffer is

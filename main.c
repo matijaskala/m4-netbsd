@@ -1,5 +1,5 @@
 /*	$OpenBSD: main.c,v 1.77 2009/10/14 17:19:47 sthen Exp $	*/
-/*	$NetBSD: main.c,v 1.48 2019/03/26 16:41:06 christos Exp $	*/
+/*	$NetBSD: main.c,v 1.50 2020/06/25 02:25:53 uwe Exp $	*/
 
 /*-
  * Copyright (c) 1989, 1993
@@ -42,7 +42,7 @@
 #include "nbtool_config.h"
 #endif
 #include <sys/cdefs.h>
-__RCSID("$NetBSD: main.c,v 1.48 2019/03/26 16:41:06 christos Exp $");
+__RCSID("$NetBSD: main.c,v 1.50 2020/06/25 02:25:53 uwe Exp $");
 #include <assert.h>
 #include <signal.h>
 #include <getopt.h>
@@ -92,8 +92,6 @@ const char *reload = NULL;	/* -R to reload state */
 FILE *freezef = NULL;
 int thawing = 0;
 #endif
-
-FILE *mystderr;
 
 struct keyblk {
         const char *knam;	/* keyword name */
@@ -198,7 +196,7 @@ onintr(int signo)
 struct option longopts[] = {
 	{ "debug",		optional_argument,	0, 'd' },
 	{ "define",		required_argument,	0, 'D' },
-	{ "error-output",	required_argument,	0, 'e' },
+	{ "error-output",	required_argument,	0, 'o' }, /* sic */
 	{ "fatal-warnings",	no_argument,		0, 'E' },
 	{ "freeze-state",	required_argument,	0, 'F' },
 	{ "gnu",		no_argument,		0, 'g' },
@@ -229,8 +227,8 @@ main(int argc, char *argv[])
 {
 	int c;
 	int n;
+	int error;
 	char *p;
-	FILE *sfp;
 
 	setprogname(argv[0]);
 
@@ -248,9 +246,7 @@ main(int argc, char *argv[])
 	outfile = NULL;
 	resizedivs(MAXOUT);
 
-	mystderr = stderr;
-
-	while ((c = getopt_long(argc, argv, "D:d:e:EF:GgI:iL:o:PR:Qst:U:v",
+	while ((c = getopt_long(argc, argv, "D:d:EF:GgI:iL:o:PR:Qst:U:v",
 	    longopts, NULL)) != -1)
 		switch(c) {
 		case 'D':               /* define something..*/
@@ -266,13 +262,6 @@ main(int argc, char *argv[])
 			break;
 		case 'E':
 			fatal_warnings++;
-			break;
-		case 'e':
-			if ((sfp = fopen(optarg, "w+")) == NULL) {
-				warn("Can't redirect errors to `%s'", optarg);
-				break;
-			}
-			mystderr = sfp;
 			break;
 		case 'F':
 			freeze = optarg;
@@ -298,7 +287,9 @@ main(int argc, char *argv[])
 			nesting_limit = atoi(optarg);
 			break;
 		case 'o':
-			trace_file(optarg);
+			error = trace_file(optarg);
+			if (error)
+				warn("%s", optarg);
                         break;
 		case 'P':
 			prefix_builtins = 1;
@@ -319,7 +310,7 @@ main(int argc, char *argv[])
 			macro_popdef(optarg);
 			break;
 		case 'v':
-			fprintf(mystderr, "%s version %d\n", getprogname(),
+			fprintf(stderr, "%s version %d\n", getprogname(),
 			    VERSION);
 			return EXIT_SUCCESS;
 		case OPT_HELP:
@@ -327,7 +318,7 @@ main(int argc, char *argv[])
 			return EXIT_SUCCESS;
 		case '?':
 		default:
-			usage(mystderr);
+			usage(stderr);
 			return EXIT_FAILURE;
 		}
 
@@ -337,7 +328,7 @@ main(int argc, char *argv[])
 	 * go to a known file, even if the command line options
 	 * send it elsewhere. It should not be turned of in production code.
 	 */
-	if (freopen("/tmp/m4", "w+", mystderr) == NULL)
+	if (freopen("/tmp/m4", "w+", stderr) == NULL)
 		err(EXIT_FAILURE, "Can't redirect errors to `%s'",
 		    "/tmp/m4");
 #endif
@@ -765,10 +756,10 @@ dump_stack(struct position *t, int lev)
 
 	for (i = 0; i < lev; i++) {
 		if (i == MAXRECORD) {
-			fprintf(mystderr, "   ...\n");
+			fprintf(stderr, "   ...\n");
 			break;
 		}
-		fprintf(mystderr, "   %s at line %lu\n", 
+		fprintf(stderr, "   %s at line %lu\n", 
 			t[i].name, t[i].line);
 	}
 }

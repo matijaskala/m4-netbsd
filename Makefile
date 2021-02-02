@@ -26,9 +26,7 @@ clean:
 	$(RM) $(SRCS:%.c=%.o)
 
 parser.c: parser.y
-	yacc -b parser -d parser.y
-	mv parser.tab.c parser.c
-	mv parser.tab.h parser.h
+	byacc -o parser.c -d -H parser.h parser.y
 
 tokenizer.c: tokenizer.l
 	lex -t $< > $@

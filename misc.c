@@ -257,16 +257,16 @@ killdiv(void)
 void
 m4errx(int exval, const char *fmt, ...)
 {
-	fprintf(mystderr, "%s: ", getprogname());
-	fprintf(mystderr, "%s at line %lu: ", CURRENT_NAME, CURRENT_LINE);
+	fprintf(stderr, "%s: ", getprogname());
+	fprintf(stderr, "%s at line %lu: ", CURRENT_NAME, CURRENT_LINE);
 	if (fmt != NULL) {
 		va_list ap;
 
 		va_start(ap, fmt);
-		vfprintf(mystderr, fmt, ap);
+		vfprintf(stderr, fmt, ap);
 		va_end(ap);
 	}
-	fprintf(mystderr, "\n");
+	fprintf(stderr, "\n");
 	exit(exval);
 }
 
